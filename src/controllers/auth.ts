@@ -8,7 +8,7 @@ export const register = async (req: Request, res: Response) => {
   const { username, password } = req.body
 
   try {
-    if (await User.findOne({ username })) {
+    if (await User.findOne({ userName: username })) {
       return res.status(400).json({ message: 'Username taken' })
     }
 
@@ -16,7 +16,7 @@ export const register = async (req: Request, res: Response) => {
     const user = new User({ userName: username, password })
     await user.save()
 
-    res.status(200).json({ userName: username, id: user._id })
+    res.status(201).json({ userName: username, id: user._id })
   } catch (error) {
     console.log(error)
     res.status(500).send('Internal Server Error')
@@ -48,4 +48,19 @@ export const logIn = async (req: Request, res: Response) => {
       message: 'Something blew up',
     })
   }
+}
+
+export const profile = async (req: Request, res: Response) => {
+  const { userId } = req
+
+  const user = await User.findById(userId)
+
+  if (!user) {
+    console.log('User not found with id: ', userId)
+    res.status(404).json({ message: 'User not found' })
+  }
+
+  res.status(200).json({
+    userName: user?.userName,
+  })
 }
