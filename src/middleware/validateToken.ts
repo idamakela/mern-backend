@@ -13,14 +13,15 @@ const validateToken = (req: Request, res: Response, next: NextFunction) => {
   if (!secret) throw Error('Missing JWT_SECRET')
 
   // check if JWT is valid
-  jwt.verify(token, secret, (error, decodedToken: any) => { // callback function at the end, runs at the end
-    if (error) {
+  jwt.verify(token, secret, (error, decodedPayload) => { 
+    // callback function at the end, runs at the end
+    if (error || !decodedPayload || typeof decodedPayload === 'string') {
       return res.status(403).json({ message: 'Not authorized' })
     }
 
     // read user id from token
     // add userId to req
-    req.userId = decodedToken.userId
+    req.userId = decodedPayload.userId
     next()
   })
 }

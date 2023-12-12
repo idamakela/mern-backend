@@ -24,6 +24,7 @@ export const register = async (req: Request, res: Response) => {
 }
 
 export const logIn = async (req: Request, res: Response) => {
+  console.log(req.userId)
   try {
     // ta in användarnamn och lösen
     const { username, password } = req.body
@@ -44,6 +45,7 @@ export const logIn = async (req: Request, res: Response) => {
 
     res.status(200).json({ token, username: user.userName })
   } catch (error) {
+    console.log("Error in login", error)
     res.status(500).json({
       message: 'Something blew up',
     })
@@ -61,6 +63,6 @@ export const profile = async (req: Request, res: Response) => {
   }
 
   res.status(200).json({
-    userName: user?.userName,
+    userName: user.userName,
   })
 }
