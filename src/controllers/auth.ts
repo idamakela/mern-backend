@@ -17,7 +17,7 @@ export const register = async (req: Request, res: Response) => {
     const user = new User({ userName: username, password })
     await user.save()
 
-    res.status(201).json({ userName: username, id: user._id })
+    return res.status(201).json({ userName: username, id: user._id })
   } catch (error) {
     console.log(error)
     res.status(500).json('Internal Server Error')
@@ -34,24 +34,21 @@ export const logIn = async (req: Request, res: Response) => {
     const user = await User.findOne({ userName: username }, '+password')
 
     // safe error handling - user or password
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    if (!user || !await bcrypt.compare(password, user.password)) {
       return res.status(400).json({ message: 'Wrong username or password' })
     }
 
-    // returnera JWT
-    const secret = process.env.JWT_SECRET
-    if (!secret) throw Error('Missing JWT_SECRET')
+    assertDefine(process.env.JWT_SECRET)
 
-    const token = jwt.sign({ userId: user._id }, secret, { expiresIn: '1h' }) // expiresIn = removes token after one hour
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' }) // expiresIn = removes token after one hour
 
-    // refresh token
-    const refreshSecret = process.env.JWT_REFRESH_SECRET
-    if (!refreshSecret) throw Error('Missing JWT_SECRET')
-    const refreshToken = jwt.sign({ userId: user._id }, refreshSecret, {
+    assertDefine(process.env.JWT_REFRESH_SECRET)
+
+    const refreshToken = jwt.sign({ userId: user._id }, process.env.JWT_REFRESH_SECRET, {
       expiresIn: '1d',
     })
 
-    res.status(200).json({ token, refreshToken, username: user.userName })
+    return res.status(200).json({ token, refreshToken, username: user.userName })
   } catch (error) {
     console.log('Error in login', error)
     res.status(500).json({
@@ -68,7 +65,7 @@ export const refreshJWT = async (req: Request, res: Response) => {
   if (!refreshSecret) throw Error('Missing JWT_SECRET')
 
   try {
-    const decodedPayload = (await jwt.verify(refreshToken, refreshSecret)) as {
+    const decodedPayload = await jwt.verify(refreshToken, refreshSecret) as {
       userId: string
     }
 
@@ -76,7 +73,7 @@ export const refreshJWT = async (req: Request, res: Response) => {
     const secret = process.env.JWT_SECRET
     assertDefine(secret) // to shorten the code and check if the value exist
 
-    const token = jwt.sign({ userId: decodedPayload }, secret, {
+    const token = jwt.sign({ userId: decodedPayload.userId }, secret, {
       expiresIn: '1h',
     }) // expiresIn = removes token after one hour
 
@@ -94,10 +91,10 @@ export const profile = async (req: Request, res: Response) => {
 
   if (!user) {
     console.log('User not found with id: ', userId)
-    res.status(404).json({ message: 'User not found' })
+    return res.status(404).json({ message: 'User not found' })
   }
 
-  res.status(200).json({
+  return res.status(200).json({
     userName: user?.userName,
   })
 }

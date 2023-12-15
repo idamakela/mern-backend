@@ -23,9 +23,33 @@ export const create = async (req: Request, res: Response) => {
   }
 }
 
-export const readAll = async (req: Request, res: Response) => {
-  // get all posts and find author name from userId
-  const posts = await Post.find().populate('author', 'userName')
+export const getAllPosts = async (req: Request, res: Response) => {
+  const limit = parseInt(req.query.limit?.toString() || '5')
+  const page = parseInt(req.query.page?.toString() || '1')
 
-  res.status(200).json(posts)
+  if (isNaN(page) || isNaN(limit)) {
+    return res.status(400).json({ message: 'Malformed query number: ' + req.query.toString() })
+  }
+
+  const posts = await Post.find({}, '-comments')
+    .sort({ createdAt: 'desc' })
+    .limit(limit)
+    .skip(limit * (page - 1))
+    .populate('author', 'userName')
+
+  const totalCount = await Post.countDocuments()
+
+  return res.status(200).json({ posts, totalPages: Math.ceil(totalCount / limit) })
+}
+
+export const getPost = async (req: Request, res: Response) => {
+  const { id } = req.params
+
+  const post = await Post.findById(id).populate('author').populate('comments.author')
+
+  if (!post) {
+    return res.status(404).json({ message: 'No post found for id: ' + id })
+  }
+
+  return res.status(200).json(post)
 }

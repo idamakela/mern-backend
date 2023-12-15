@@ -1,4 +1,4 @@
-import { Document, Schema, model } from 'mongoose'
+import { Document, Schema, model, Model, MongooseError } from 'mongoose'
 import bcrypt from 'bcrypt'
 
 // define schema interface
@@ -10,30 +10,40 @@ interface IUser extends Document {
 }
 
 // define db schema
-const UserSchema = new Schema<IUser>({
-  userName: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true
+const UserSchema = new Schema<IUser>(
+  {
+    userName: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+    password: {
+      type: String,
+      required: true,
+      select: false, // can never get password
+    },
   },
-  password: {
-    type: String,
-    required: true,
-    select: false // can never get password
-  }
-}, {
-  // options field
-  timestamps: true,
-})
+  {
+    // options field
+    timestamps: true,
+  },
+)
 
 // middleware option to run in the schema
-UserSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) next()
+UserSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) {
+    return next()
+  }
 
+  try {
     // passwork hashing for safety
-    const passwordHash = await bcrypt.hash(this.password, 10)
-    this.password = passwordHash
+    this.password = await bcrypt.hash(this.password, 10)
+    next()
+  } catch (error) {
+    if (error instanceof MongooseError) next(error)
+    else throw error
+  }
 })
 
 // User model - model<type safety>(model name, what schema)
