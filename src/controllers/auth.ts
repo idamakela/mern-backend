@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import User from '../models/User'
+import { assertDefine } from '../utils/asserts'
 
 export const register = async (req: Request, res: Response) => {
   // read var from req body
@@ -30,7 +31,7 @@ export const logIn = async (req: Request, res: Response) => {
     const { username, password } = req.body
 
     // hitta användare
-    const user = await User.findOne({ userName: username })
+    const user = await User.findOne({ userName: username }, '+password')
 
     // safe error handling - user or password
     if (!user || !(await bcrypt.compare(password, user.password))) {
@@ -73,7 +74,7 @@ export const refreshJWT = async (req: Request, res: Response) => {
 
     // returnera JWT
     const secret = process.env.JWT_SECRET
-    if (!secret) throw Error('Missing JWT_SECRET')
+    assertDefine(secret) // to shorten the code and check if the value exist
 
     const token = jwt.sign({ userId: decodedPayload }, secret, {
       expiresIn: '1h',

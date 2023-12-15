@@ -1,8 +1,10 @@
 import { Request, Response } from 'express'
 import Post from '../models/Post'
+import { assertDefine } from '../utils/asserts'
 
 // CRUD controller for Posts
 export const create = async (req: Request, res: Response) => {
+  assertDefine(req.userId) // to make sure the code only runs when a userId is defined.
   const { title, link, body } = req.body
 
   const post = new Post({
