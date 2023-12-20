@@ -5,6 +5,7 @@ import cors from 'cors'
 import * as authController from './controllers/auth'
 import * as postController from './controllers/posts'
 import * as commentController from './controllers/comments'
+import * as votesController from './controllers/votes'
 import validateToken from './middleware/validateToken'
 
 const app = express()
@@ -16,12 +17,16 @@ app.use(express.json())
 // HANDLERS
 app.post('/register', authController.register) // handle user reqistration
 app.post('/login', authController.logIn) // handle login
-app.post('token/refresh', validateToken, authController.refreshJWT)
+app.post('/token/refresh', validateToken, authController.refreshJWT)
 app.get('/profile', validateToken, authController.profile) // handle profile with middleware
 
 app.post('/posts', validateToken, postController.create) // handle create post
 app.get('/posts', postController.getAllPosts) // handle read all posts
 app.get('/posts/:id', postController.getPost)
+
+// it's possible to use put or patch methods here
+app.post('/posts/:postId/upvote', validateToken, votesController.upvote)
+app.post('/posts/:postId/downvote', validateToken, votesController.downvote)
 
 app.post('/posts/:postId/comments', validateToken, commentController.createComment)
 app.delete('/posts/:postId/comments/:commentId', validateToken, commentController.deleteComment)
