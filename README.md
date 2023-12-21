@@ -34,3 +34,9 @@ Plan the user
 
 `docker compose up -d` - docker runs in the background
 `docker compose down` - quit docker
+
+## Build and Deploy
+
+1. Create database on MongoDB Atlas
+2. run `npm run build`
+3. run `npm run start`
