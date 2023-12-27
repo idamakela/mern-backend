@@ -23,6 +23,7 @@ app.get('/profile', validateToken, authController.profile) // handle profile wit
 app.post('/posts', validateToken, postController.create) // handle create post
 app.get('/posts', postController.getAllPosts) // handle read all posts
 app.get('/posts/:id', postController.getPost)
+app.delete('/posts/:id', validateToken, postController.deletePost)
 
 // it's possible to use put or patch methods here
 app.post('/posts/:postId/upvote', validateToken, votesController.upvote)

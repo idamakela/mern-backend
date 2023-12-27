@@ -25,11 +25,11 @@ const validateToken = (req: Request, res: Response, next: NextFunction) => {
     }
 
     if (typeof decodedPayload === 'string') {
-      return res.status(403).json({message: 'Not authorized, type error'})
+      return res.status(403).json({ message: 'Not authorized, type error' })
     }
 
     if (error) {
-      return res.status(403).json({message: 'Not authorized error'})
+      return res.status(403).json({ message: 'Not authorized error' })
     }
 
     if (!(await User.exists({ _id: decodedPayload.userId }))) {

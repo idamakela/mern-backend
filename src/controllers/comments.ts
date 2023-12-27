@@ -38,16 +38,14 @@ export const deleteComment = async (req: Request, res: Response) => {
   const comment = post.comments.id(commentId)
 
   if (!comment) {
-    return res
-      .status(404)
-      .json({ message: 'No comment found with id: ' + commentId })
+    return res.status(404).json({ message: 'No comment found with id: ' + commentId })
   }
 
   if (comment.author.toString() !== userId) {
     return res.status(403).json({ message: 'Not aurhorized' })
   }
 
-  comment.deleteOne()
+  await comment.deleteOne()
 
   const updatedPost = await post.save()
 
