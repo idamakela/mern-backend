@@ -152,7 +152,7 @@ export const deletePost = async (req: Request, res: Response) => {
   const post = await Post.findById(id)
 
   if (!post) {
-    return res.status(404).json({ message: 'No post found for id: ' + id })
+    return res.status(404).json({ message: 'No post found with id: ' + id })
   }
 
   if (post.author.toString() !== userId) {
