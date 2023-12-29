@@ -1,7 +1,7 @@
-import { Document, Schema, model, Model, MongooseError } from 'mongoose'
+import { Document, Schema, model, MongooseError } from 'mongoose'
 import bcrypt from 'bcrypt'
 
-// define schema interface
+// SCHEMA INTERFACE
 interface IUser extends Document {
   userName: string
   password: string
@@ -9,7 +9,7 @@ interface IUser extends Document {
   updatedAt: Date
 }
 
-// define db schema
+// DB SCHEMA
 const UserSchema = new Schema<IUser>(
   {
     userName: {
@@ -21,23 +21,22 @@ const UserSchema = new Schema<IUser>(
     password: {
       type: String,
       required: true,
-      select: false, // can never get password
+      select: false, 
     },
   },
   {
-    // options field
     timestamps: true,
   },
 )
 
-// middleware option to run in the schema
+// MIDDLEWARE
 UserSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
     return next()
   }
 
   try {
-    // passwork hashing for safety
+    // PASSWORD HASHING
     this.password = await bcrypt.hash(this.password, 10)
     next()
   } catch (error) {
@@ -46,7 +45,7 @@ UserSchema.pre('save', async function (next) {
   }
 })
 
-// User model - model<type safety>(model name, what schema)
+// USER MODEL
 const User = model<IUser>('User', UserSchema)
 
 export default User

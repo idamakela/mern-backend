@@ -5,7 +5,6 @@ import User from '../models/User'
 import { assertDefine } from '../utils/asserts'
 
 export const register = async (req: Request, res: Response) => {
-  // read var from req body
   const { username, password } = req.body
 
   try {
@@ -13,7 +12,6 @@ export const register = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Username taken' })
     }
 
-    // post to User and wait for save
     const user = new User({ userName: username, password })
     await user.save()
 
@@ -27,20 +25,17 @@ export const register = async (req: Request, res: Response) => {
 export const logIn = async (req: Request, res: Response) => {
   console.log(req.userId)
   try {
-    // ta in användarnamn och lösen
     const { username, password } = req.body
 
-    // hitta användare
     const user = await User.findOne({ userName: username }, '+password')
 
-    // safe error handling - user or password
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(400).json({ message: 'Wrong username or password' })
     }
 
     assertDefine(process.env.JWT_SECRET)
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' }) // expiresIn = removes token after one hour
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' })
 
     assertDefine(process.env.REFRESH_JWT_SECRET)
 
@@ -60,7 +55,6 @@ export const logIn = async (req: Request, res: Response) => {
 export const refreshJWT = async (req: Request, res: Response) => {
   const { refreshToken } = req.body
 
-  // refresh token
   const refreshSecret = process.env.REFRESH_JWT_SECRET
   if (!refreshSecret) {
     throw Error('Missing JWT_SECRET')
@@ -72,12 +66,11 @@ export const refreshJWT = async (req: Request, res: Response) => {
     }
 
     const secret = process.env.JWT_SECRET
-    assertDefine(secret) // to shorten the code and check if the value exist
-    
-    // returnera JWT
+    assertDefine(secret)
+
     const token = jwt.sign({ userId: decodedPayload.userId }, secret, {
       expiresIn: '1h',
-    }) // expiresIn = removes token after one hour
+    })
 
     return res.status(200).json({ token })
   } catch (error) {

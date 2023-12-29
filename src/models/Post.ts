@@ -1,5 +1,6 @@
 import { Document, Model, Schema, Types, model } from 'mongoose'
 
+// SCHEMA INTERFACE
 interface IComment extends Document {
   body: string
   author: Types.ObjectId
@@ -7,6 +8,7 @@ interface IComment extends Document {
   updatedAt: Date
 }
 
+// DB SCHEMA
 const CommentSchema = new Schema<IComment>(
   {
     body: {
@@ -24,6 +26,7 @@ const CommentSchema = new Schema<IComment>(
   },
 )
 
+// DB SCHEMA
 interface IPost extends Document {
   title: string
   link?: string
@@ -45,6 +48,7 @@ interface IPostProps {
 
 type IPostModel = Model<IPost, {}, IPostProps>
 
+// DB SCHEMA
 const PostSchema = new Schema<IPost, IPostModel>(
   {
     title: {
@@ -61,7 +65,7 @@ const PostSchema = new Schema<IPost, IPostModel>(
     },
     author: {
       type: Schema.Types.ObjectId,
-      ref: 'User', // ska matcha model namnet i User.ts
+      ref: 'User',
       required: true,
     },
     comments: [CommentSchema],
@@ -87,6 +91,7 @@ const PostSchema = new Schema<IPost, IPostModel>(
   },
 )
 
+// VOTE METHODS
 PostSchema.method('upvote', async function (this: IPost, userId: string) {
   const userIdObject = new Types.ObjectId(userId)
 
@@ -111,6 +116,7 @@ PostSchema.method('downvote', async function (this: IPost, userId: string) {
   this.downvotes.push(userIdObject)
 })
 
+// MIDDLEWARE
 PostSchema.pre<IPost>('save', function (next) {
   if (this.isModified('upvotes') || this.isModified('downvotes')) {
     this.score = this.upvotes.length - this.downvotes.length
@@ -118,6 +124,7 @@ PostSchema.pre<IPost>('save', function (next) {
   next()
 })
 
+// POST MODEL
 const Post = model<IPost, IPostModel>('Post', PostSchema)
 
 export default Post

@@ -10,7 +10,7 @@ export const upvote = async (req: Request, res: Response) => {
   const post = await Post.findById(postId)
 
   if (!post) {
-    return res.status(404).json({message: 'Post not found with ID: ' + postId})
+    return res.status(404).json({ message: 'Post not found with ID: ' + postId })
   }
 
   post.upvote(userId)
@@ -28,7 +28,7 @@ export const downvote = async (req: Request, res: Response) => {
   const post = await Post.findById(postId)
 
   if (!post) {
-    return res.status(404).json({message: 'Post not found with ID: ' + postId})
+    return res.status(404).json({ message: 'Post not found with ID: ' + postId })
   }
 
   post.downvote(userId)
