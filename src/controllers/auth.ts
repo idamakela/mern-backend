@@ -23,7 +23,6 @@ export const register = async (req: Request, res: Response) => {
 }
 
 export const logIn = async (req: Request, res: Response) => {
-  console.log(req.userId)
   try {
     const { username, password } = req.body
 
@@ -85,8 +84,7 @@ export const profile = async (req: Request, res: Response) => {
   const user = await User.findById(userId)
 
   if (!user) {
-    console.log('User not found with id: ', userId)
-    return res.status(404).json({ message: 'User not found' })
+    return res.status(404).json({ message: 'User not found with id: ' + userId })
   }
 
   return res.status(200).json({
